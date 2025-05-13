@@ -1,13 +1,27 @@
-import React, { useState, useEffect } from "react";
-import { WalletInfo } from "./components/WalletInfo";
-import { Chart } from "./components/Chart";
+import { useState, useEffect } from "react";
+import { useMexc } from "./hooks/useMexc";
+import { useWallet } from "./hooks/useWallet";
+import { CandleChart } from "./components/CandleChart";
+import { getCandleData } from "./services/api";
 import { TradeForm } from "./components/TradeForm";
 import { OpenOrders } from "./components/OpenOrders";
 import { OrderHistory } from "./components/OrderHistory";
-import { useMexc } from './hooks/useMexc';
-import "./App.css";
+import { WalletInfo } from "./components/WalletInfo";
+import { AlgorithmSettings } from "./components/AlgorithmSettings";
+import { AddWalletModal } from "./components/AddWalletModal";
+import { WalletSelector } from "./components/WalletSelector";
 
 function App() {
+  const {
+    wallets,
+    selectedWallet,
+    setSelectedWallet,
+    addWallet,
+    removeWallet,
+    showAddModal,
+    setShowAddModal,
+  } = useWallet();
+
   const {
     balance,
     currentPrice,
@@ -18,49 +32,113 @@ function App() {
     placeOrder,
     setLeverage,
     applyAlgorithm,
+    algorithmSettings,
+    updateAlgorithmSettings,
+    setSelectedAlgorithm,
+    connectionStatus,
   } = useMexc();
 
-  const [algorithm, setAlgorithm] = useState("meanReversion");
-  const [leverage, setLeverageInput] = useState(10);
-
+  // Seçili cüzdan değiştiğinde bağlantıyı güncelle
   useEffect(() => {
-    setLeverage(leverage);
-  }, [leverage, setLeverage]);
+    if (selectedWallet) {
+      connectWallet(selectedWallet.apiKey, selectedWallet.secretKey);
+    }
+  }, [selectedWallet, connectWallet]);
 
+  const handleAddWallet = (wallet) => {
+    addWallet(wallet);
+  };
+
+  const handleDisconnect = () => {
+    setSelectedWallet(null);
+  };
+
+  const [interval, setInterval] = useState("1h");
+  const [priceData, setPriceData] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getCandleData(interval);
+      setPriceData(data);
+    };
+    fetchData();
+  }, [interval]);
   return (
-    <div className="app">
-      <header>
-        <h1>Doge/USDT Trading Bot</h1>
+    <div className="min-h-screen bg-gray-100 p-4 md:p-6">
+      {/* Add Wallet Modal */}
+      <AddWalletModal
+        show={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={handleAddWallet}
+      />
+
+      <header className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+          Doge/USDT Trading Bot
+        </h1>
+
+        {/* Wallet Selector */}
+        <div className="w-64">
+          <WalletSelector
+            wallets={wallets}
+            selectedWallet={selectedWallet}
+            setSelectedWallet={setSelectedWallet}
+            setShowAddModal={setShowAddModal}
+          />
+        </div>
       </header>
 
-      <div className="grid-container">
-        <div className="wallet-section">
-          <WalletInfo balance={balance} connectWallet={connectWallet} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="space-y-6 lg:col-span-2">
+          <div className="bg-white rounded-lg shadow p-4">
+            
+            <CandleChart
+              priceData={priceData}
+              interval={interval}
+              onIntervalChange={setInterval}
+              currentPrice={currentPrice}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow p-4">
+              <OpenOrders orders={openOrders} currentPrice={currentPrice} />
+            </div>
+            <div className="bg-white rounded-lg shadow p-4">
+              <OrderHistory history={orderHistory} />
+            </div>
+          </div>
         </div>
 
-        <div className="chart-section">
-          <Chart priceHistory={priceHistory} currentPrice={currentPrice} />
-        </div>
+        <div className="space-y-6">
+          <WalletInfo
+            balance={balance}
+            selectedWallet={selectedWallet}
+            onDisconnect={handleDisconnect}
+          />
 
-        <div className="trade-section">
           <TradeForm
             currentPrice={currentPrice}
             placeOrder={placeOrder}
-            algorithm={algorithm}
-            setAlgorithm={setAlgorithm}
-            leverage={leverage}
-            setLeverageInput={setLeverageInput}
+            algorithm={algorithmSettings.selectedAlgorithm}
+            setAlgorithm={setSelectedAlgorithm}
+            leverage={
+              algorithmSettings[algorithmSettings.selectedAlgorithm].leverage
+            }
+            setLeverageInput={(lev) =>
+              updateAlgorithmSettings(algorithmSettings.selectedAlgorithm, {
+                leverage: lev,
+              })
+            }
             applyAlgorithm={applyAlgorithm}
-            connectWallet={connectWallet}  
+            connectWallet={connectWallet}
+            connectionStatus={connectionStatus}
           />
-        </div>
 
-        <div className="open-orders">
-          <OpenOrders orders={openOrders} currentPrice={currentPrice} />
-        </div>
-
-        <div className="order-history">
-          <OrderHistory history={orderHistory} />
+          <AlgorithmSettings
+            algorithmSettings={algorithmSettings}
+            updateAlgorithmSettings={updateAlgorithmSettings}
+            setSelectedAlgorithm={setSelectedAlgorithm}
+          />
         </div>
       </div>
     </div>

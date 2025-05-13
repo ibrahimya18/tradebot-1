@@ -1,37 +1,69 @@
-import axios from 'axios';
-import CryptoJS from 'crypto-js';
+import axios from 'axios'; 
 
-const API_URL = 'https://api.mexc.com';
+axios.defaults.baseURL = 'http://localhost:5000';
 
-export const getBalance = async (apiKey, secretKey) => {
-  const timestamp = Date.now();
-  const queryString = `timestamp=${timestamp}`;
-  const signature = CryptoJS.HmacSHA256(queryString, secretKey).toString(CryptoJS.enc.Hex);
-  
-  const response = await axios.get(`${API_URL}/api/v3/account?${queryString}&signature=${signature}`, {
-    headers: {
-      'X-MEXC-APIKEY': apiKey
-    }
-  });
-  
-  return response.data.balances.find(b => b.asset === 'USDT');
+
+
+
+export const getDogeUsdtPrice = async () => {
+  try {
+    const response = await axios.get('/api/price');  
+    return parseFloat(response.data.price);
+  } catch (error) {
+    console.error('Error fetching DOGE price:', error);
+    return 0;
+  }
 };
 
-export const getPriceHistory = async () => {
-  const response = await axios.get(`${API_URL}/api/v3/klines?symbol=DOGEUSDT&interval=1m&limit=100`);
-  return response.data.map(k => parseFloat(k[2])); // Kapanış fiyatları (MEXC formatı)
+
+
+export const getCandleData = async (interval = '1d') => {
+  try {
+    const response = await axios.get(`/api/history?interval=${interval}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching candlestick data:', error);
+    return [];
+  }
+};
+
+
+
+export const getPriceHistory = async (interval = '1d', limit = 100) => {
+  try {
+    const response = await axios.get('/api/history', {
+      params: { interval, limit }
+    });
+    return response.data.prices;
+  } catch (error) {
+    console.error('Error fetching price history:', error);
+    return [];
+  }
+};
+
+
+export const getBalance = async (apiKey, secretKey) => {
+  try {
+    const response = await axios.post('/api/balance', { apiKey, secretKey });
+    return response.data.balance;
+  } catch (error) {
+    console.error('Error fetching balance:', error);
+    return null;
+  }
 };
 
 export const placeOrder = async (order) => {
-  const timestamp = Date.now();
-  const queryString = `symbol=DOGEUSDT&side=${order.side}&type=LIMIT&quantity=${order.amount}&price=${order.price}&timestamp=${timestamp}`;
-  const signature = CryptoJS.HmacSHA256(queryString, order.secretKey).toString(CryptoJS.enc.Hex);
-  
-  const response = await axios.post(`${API_URL}/api/v3/order`, `${queryString}&signature=${signature}`, {
-    headers: {
-      'X-MEXC-APIKEY': order.apiKey
-    }
-  });
-  
-  return response.data;
+  try {
+    const response = await axios.post('/api/order', {
+      apiKey: order.apiKey,
+      secretKey: order.secretKey,
+      side: order.side,
+      amount: order.amount,
+      price: order.price
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error placing order:', error);
+    return null;
+  }
 };

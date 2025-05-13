@@ -38,27 +38,11 @@ export const TradeForm = ({
   };
 
   return (
-    <div className="trade-form">
-      <h3>Trading Controls</h3>
+    <div className="trade-form"> 
       
       {!isConnected ? (
-        <div className="wallet-connect">
-          <div className="connection-status">
-            Status: <span className={connectionStatus}>{connectionStatus}</span>
-          </div>
-          <input 
-            type="text" 
-            placeholder="API Key" 
-            value={apiKey} 
-            onChange={(e) => setApiKey(e.target.value)} 
-          />
-          <input 
-            type="password" 
-            placeholder="Secret Key" 
-            value={secretKey} 
-            onChange={(e) => setSecretKey(e.target.value)} 
-          />
-          <button onClick={handleConnect}>Connect Wallet</button>
+        <div className="wallet-connect"> 
+           
         </div>
       ) : (
         <>
