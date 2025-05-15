@@ -27,7 +27,7 @@ export const CandleChart = ({ priceData, interval, onIntervalChange, currentPric
   const lastTimestamp = useMemo(() => {
     if (priceData.length === 0) return null;
     const lastData = priceData[priceData.length - 1];
-    return lastData.x; // timestamp değeri
+    return lastData.x; 
   }, [priceData]);
 
   const data = {

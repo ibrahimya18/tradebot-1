@@ -53,7 +53,7 @@ function App() {
     setSelectedWallet(null);
   };
 
-  const [interval, setInterval] = useState("1h");
+  const [interval, setInterval] = useState("1d");
   const [priceData, setPriceData] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
