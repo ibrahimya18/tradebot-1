@@ -56,17 +56,25 @@ app.post('/api/balance', async (req, res) => {
 
   try {
     const timestamp = Date.now();
-    const queryString = `timestamp=${timestamp}`;
-    const signature = CryptoJS.HmacSHA256(queryString, secretKey).toString(CryptoJS.enc.Hex);
+    const recvWindow = 5000;
+    const params = `recvWindow=${recvWindow}&timestamp=${timestamp}`;
+    const signature = CryptoJS.HmacSHA256(params, secretKey).toString(CryptoJS.enc.Hex);
 
-    const response = await axios.get(`https://api.mexc.com/api/v3/account?${queryString}&signature=${signature}`, {
+    const url = `https://api.mexc.com/api/v3/account?${params}&signature=${signature}`;
+
+    const response = await axios.get(url, {
       headers: { 'X-MEXC-APIKEY': apiKey }
     });
 
     const usdtBalance = response.data.balances.find(b => b.asset === 'USDT');
     res.json({ balance: usdtBalance });
+    console.log("bakiye",response)
   } catch (error) {
-    console.error('Balance hatası:', error.message);
+    console.error('Balance hatası:', {
+      message: error.message,
+      data: error.response?.data,
+      status: error.response?.status,
+    });
     res.status(500).json({ error: 'Bakiye alınamadı' });
   }
 });

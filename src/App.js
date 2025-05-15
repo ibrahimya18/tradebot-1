@@ -53,15 +53,23 @@ function App() {
     setSelectedWallet(null);
   };
 
-  const [interval, setInterval] = useState("1d");
+  const [interval, setInterval] = useState("15m");
   const [priceData, setPriceData] = useState([]);
   useEffect(() => {
-    const fetchData = async () => {
-      const data = await getCandleData(interval);
-      setPriceData(data);
-    };
-    fetchData();
-  }, [interval]);
+  const fetchData = async () => {
+    const rawData = await getCandleData(interval);
+    const transformed = rawData.prices.map(p => ({
+      x: p.timestamp,
+      o: p.open,
+      h: p.high,
+      l: p.low,
+      c: p.close,
+    }));
+    setPriceData(transformed);
+  };
+  fetchData();
+}, [interval]);
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-6">
       {/* Add Wallet Modal */}

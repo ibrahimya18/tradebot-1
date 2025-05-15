@@ -28,8 +28,8 @@ export const useMexc = () => {
     }
     try {
       setConnectionStatus('connecting');
-      //const bal = await getBalance(apiKey, secretKey);
-      //setBalance(bal);
+      const bal = await getBalance(apiKey, secretKey);
+      setBalance(bal);
       
       // WebSocket bağlantısı
       //const websocket = new WebSocket('wss://wbs.mexc.com/ws');
@@ -132,28 +132,7 @@ export const useMexc = () => {
     };
      
     fetchInitialData();
-  }, []);
-  //useEffect(() => {
-  //   const ws = new WebSocket('wss://wbs.mexc.com/ws');
-
-  //   ws.onopen = () => {
-  //     ws.send(JSON.stringify({
-  //       method: "SUBSCRIPTION",
-  //       params: ["spot@public.miniTicker.v3.api@DOGEUSDT"]
-  //     }));
-  //   };
-
-  //   ws.onmessage = (event) => {
-  //     const data = JSON.parse(event.data);
-  //     if (data?.d?.c) {
-  //       const newPrice = parseFloat(data.d.c);
-  //       setCurrentPrice(newPrice);
-  //       setPriceHistory(prev => [...prev.slice(-99), newPrice]);
-  //     }
-  //   };
-
-  //   return () => ws.close();
-  // }, []);
+  }, []); 
 
   return {
     balance,

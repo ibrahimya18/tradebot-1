@@ -20,6 +20,7 @@ export const getDogeUsdtPrice = async () => {
 export const getCandleData = async (interval = '1d') => {
   try {
     const response = await axios.get(`/api/history?interval=${interval}`);
+     
     return response.data;
   } catch (error) {
     console.error('Error fetching candlestick data:', error);
@@ -45,7 +46,9 @@ export const getPriceHistory = async (interval = '1d', limit = 100) => {
 export const getBalance = async (apiKey, secretKey) => {
   try {
     const response = await axios.post('/api/balance', { apiKey, secretKey });
-    return response.data.balance;
+    
+    return response.data.balance
+    
   } catch (error) {
     console.error('Error fetching balance:', error);
     return null;

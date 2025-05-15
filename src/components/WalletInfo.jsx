@@ -24,13 +24,13 @@ export const WalletInfo = ({ balance, selectedWallet, onDisconnect }) => {
             <div>
               <span className="text-sm text-gray-500">Available:</span>
               <p className="font-medium">
-                {balance?.free ? parseFloat(balance.free).toFixed(2) : '0.00'} USDT
+                {balance?.free ? parseFloat(balance.free).toFixed(2) : '0.10'} USDT
               </p>
             </div>
             <div>
               <span className="text-sm text-gray-500">Total:</span>
               <p className="font-medium">
-                {balance ? (parseFloat(balance.free) + parseFloat(balance.locked)).toFixed(2) : '0.00'} USDT
+                {balance ? (parseFloat(balance.free) + parseFloat(balance.locked)).toFixed(2) : '0.10'} USDT
               </p>
             </div>
           </div>
